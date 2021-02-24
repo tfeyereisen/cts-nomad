@@ -8,7 +8,7 @@ After=network-online.target
 Type=notify
 User=consul
 Group=consul
-ExecStart=/usr/bin/consul agent -config-dir=/etc/consul.d/
+ExecStart=/usr/local/bin/consul agent -config-dir=/etc/consul.d/
 ExecReload=/bin/kill --signal HUP $MAINPID
 KillMode=process
 KillSignal=SIGTERM
