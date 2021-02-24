@@ -1,5 +1,10 @@
 {
   "data_dir": "/opt/nomad/client",
+  advertise {
+    http = "$${IP_ADDR}:4746"
+    rpc  = "$${IP_ADDR}:4747"
+    serf = "$${IP_ADDR}:4748"
+  },
   "client": {
     "enabled": true
   },
