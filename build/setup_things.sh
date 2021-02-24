@@ -5,8 +5,7 @@ sudo snap install amazon-ssm-agent --classic
 
 # Tools
 sudo apt-get update
-sudo apt-get -y install net-tools zip
-sudo snap install jq
+sudo apt-get -y install net-tools zip jq
 
 # Install Consul and Nomad
 export CONSUL_VERSION="1.9.3"
