@@ -57,8 +57,8 @@ job "consul-ingress-sync-${region}" {
       }
 
       resources {
-        cpu = 800
-        memory = 2000
+        cpu = 500
+        memory = 500
       }
     }
   }
