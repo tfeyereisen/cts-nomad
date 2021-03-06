@@ -7,4 +7,5 @@ module "sync-lb" {
   certificate_arn   = aws_acm_certificate.cert.arn
   zone_id           = var.zone_id
   domain            = var.domain
+  depends_on = [aws_lb_listener_rule.nomad]
 }
