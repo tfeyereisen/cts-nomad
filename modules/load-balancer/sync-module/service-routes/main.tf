@@ -29,9 +29,9 @@ locals {
     length(regexall("(.*)prod(.*)", lower(local.environment))) > 0 ? local.example_service.meta.hostname : "${local.example_service.meta.hostname}-${local.environment}",
     ".exactsciences.net"
   ])
-  rule_name = trimprefix("${local.subdomain}-${local.service_name}-${local.environment}", "-")
-  health_check_path  = lookup(local.example_service.meta, "health_check_path", "/")
-  health_check_healthy_response_codes  = lookup(local.example_service.meta, "health_check_healthy_response_codes", "200")
+  rule_name                           = trimprefix("${local.subdomain}-${local.service_name}-${local.environment}", "-")
+  health_check_path                   = lookup(local.example_service.meta, "health_check_path", "/")
+  health_check_healthy_response_codes = lookup(local.example_service.meta, "health_check_healthy_response_codes", "200")
 }
 
 data "aws_vpc" "default" {
@@ -64,7 +64,7 @@ resource "aws_lb_target_group" "service-tg" {
   target_type = "ip"
   vpc_id      = data.aws_vpc.default.id
   health_check {
-    path = local.health_check_path
+    path    = local.health_check_path
     matcher = local.health_check_healthy_response_codes
   }
 }
@@ -88,7 +88,7 @@ resource "aws_lb_target_group" "service-version-tg" {
   target_type = "ip"
   vpc_id      = data.aws_vpc.default.id
   health_check {
-    path = local.health_check_path
+    path    = local.health_check_path
     matcher = local.health_check_healthy_response_codes
   }
 }

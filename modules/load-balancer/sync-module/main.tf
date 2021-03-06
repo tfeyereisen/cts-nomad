@@ -27,11 +27,11 @@ locals {
 }
 
 module "service-routes" {
-  for_each                                = local.service_collection
-  source                                  = "./service-routes"
-  services                                = each.value
-  zone_id = var.zone_id
-  domain = var.domain
+  for_each = local.service_collection
+  source   = "./service-routes"
+  services = each.value
+  zone_id  = var.zone_id
+  domain   = var.domain
 }
 
 # For debugging
