@@ -3,6 +3,9 @@
 # AWS SSM Agent
 sudo snap install amazon-ssm-agent --classic
 
+# Docker
+sudo snap install docker
+
 # Tools
 sudo apt-get update
 sudo apt-get -y install net-tools zip jq
@@ -24,5 +27,8 @@ sudo unzip nomad_${NOMAD_VERSION}_linux_amd64.zip
 sudo chown root:root nomad
 sudo mv nomad /usr/local/bin/
 sudo mkdir -p /etc/{nomad-server.d,nomad-client.d}
-sudo mkdir -p /opt/nomad/{server,client}
 sudo chmod -R 777 /opt/nomad
+sudo chmod g+s /opt/nomad
+sudo setfacl -d -m g::rwx /opt/nomad
+sudo setfacl -d -m o::rwx /opt/nomad
+sudo mkdir -p /opt/nomad/{server,client}

@@ -8,7 +8,8 @@ variable "consul_terraform_sync_image" {
 
 locals {
   sync_config = templatefile("${path.module}/sync.hcl.tmpl", {
-    region = var.region
+    region = var.region,
+    domain = var.domain
   })
   sync_module_main = file("${path.module}/sync-module/main.tf")
   sync_module_variables = templatefile("${path.module}/sync-module/variables.tf.tmpl", {
