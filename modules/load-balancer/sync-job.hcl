@@ -1,16 +1,5 @@
 job "consul-ingress-sync-${region}" {
   datacenters = ["es-operations-dc1"]
-  namespace = "${namespace}"
-
-  constraint {
-    attribute    = "$${meta.namespace}"
-    set_contains = "${namespace}"
-  }
-
-  constraint {
-    attribute = "$${node.class}"
-    value = "${namespace}"
-  }
 
   group "sync" {
     count = "1"
@@ -33,10 +22,6 @@ job "consul-ingress-sync-${region}" {
           "-config-file",
           "/local/sync.hcl",
         ]
-      }
-
-      vault {
-        policies = ["${namespace}-nomad-client-policy"]
       }
 
       template {
@@ -76,7 +61,5 @@ job "consul-ingress-sync-${region}" {
         memory = 2000
       }
     }
-
-
   }
 }

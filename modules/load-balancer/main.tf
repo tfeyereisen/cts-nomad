@@ -10,6 +10,7 @@ locals {
   sync_module_variables = templatefile("${path.module}/sync-module/variables.tf.tmpl", {
     region                                  = var.region,
     zone_id = var.zone_id
+    domain = var.domain
   })
   service_routes_main      = file("${path.module}/sync-module/service-routes/main.tf")
   service_routes_variables = file("${path.module}/sync-module/service-routes/variables.tf")

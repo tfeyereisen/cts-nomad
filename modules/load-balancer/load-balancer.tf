@@ -27,7 +27,7 @@ resource "aws_lb_listener" "default_https" {
   load_balancer_arn = aws_lb.consul-ingress-alb.arn
   port              = "443"
   protocol          = "HTTPS"
-  certificate_arn   = var.exactsciences_net_certificate_arn
+  certificate_arn   = var.certificate_arn
 
   default_action {
     type = "fixed-response"
