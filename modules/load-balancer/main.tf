@@ -1,6 +1,6 @@
 
 variable "consul_terraform_sync_image" {
-  default = "hashicorp/consul-terraform-sync:0.1.0-beta"
+  default = "hashicorp/consul-terraform-sync:0.1.0-techpreview2"
 }
 
 locals {
@@ -21,8 +21,8 @@ locals {
 resource "nomad_job" "sync" {
   depends_on = [aws_lb.consul-ingress-alb]
   jobspec = templatefile("${path.module}/sync-job.hcl", {
-    region                   = var.region,
-    sync_container_image     = var.consul_terraform_sync_image,
+    region                   = var.region
+    sync_container_image     = var.consul_terraform_sync_image
     sync_config              = local.sync_config
     sync_module_main         = local.sync_module_main
     sync_module_variables    = local.sync_module_variables
