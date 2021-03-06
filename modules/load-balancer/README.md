@@ -1,7 +1,5 @@
 # Overview and Usage
 
-More documentation in Conflunece [here](https://confluence.exactsciences.net/pages/viewpage.action?pageId=120292600).
-
 The sync is managed by a nomad job that runs [consul-terraform-sync](https://www.consul.io/docs/nia/installation/configuration)
 
 The nomad job installs the sync-module directory into the container which contains the sync configuration (sync.hcl) and

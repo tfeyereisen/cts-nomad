@@ -1,5 +1,5 @@
 job "consul-ingress-sync-${region}" {
-  datacenters = ["es-operations-dc1"]
+  datacenters = ["dc1"]
 
   group "sync" {
     count = "1"
