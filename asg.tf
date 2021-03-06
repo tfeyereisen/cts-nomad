@@ -8,8 +8,6 @@ data "aws_ami" "hashi_ami" {
   owners = ["self"]
 }
 
-
-
 resource "aws_launch_configuration" "launch_config" {
   name_prefix                 = "hashi-cluster-launch-config-"
   image_id                    = data.aws_ami.hashi_ami.id

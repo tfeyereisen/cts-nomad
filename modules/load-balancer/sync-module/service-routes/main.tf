@@ -1,10 +1,3 @@
-provider "aws" {
-  alias = "target-account"
-}
-
-provider "aws" {
-  alias = "shared-account"
-}
 
 # Create a list of distinct versions
 locals {
@@ -14,12 +7,12 @@ locals {
 
 # Construct hostname and infer service name and environment
 #
-# If environment is prod, then hostname = service_name.exactsciences.net
-# If environment is not prod, then hostname = service_name-environment.exactsciences.net
+# If environment is prod, then hostname = service_name.domain
+# If environment is not prod, then hostname = service_name-environment.domain
 #
 # If the service meta contains the subdomain key, then prepend the subdomain to the hostname:
-#     subdomain = api   results in     api.service_name.exactsciences.net for prod
-#                                      api.service_name-environment.exactsciences.net for non prod
+#     subdomain = api   results in     api.service_name.domain for prod
+#                                      api.service_name-environment.domain for non prod
 locals {
   service_name = local.example_service.name
   environment  = local.example_service.meta.environment
@@ -27,15 +20,14 @@ locals {
   hostname = join("", [
     local.subdomain == "" ? "" : join("", [local.subdomain, "."]),
     length(regexall("(.*)prod(.*)", lower(local.environment))) > 0 ? local.example_service.meta.hostname : "${local.example_service.meta.hostname}-${local.environment}",
-    ".exactsciences.net"
+    ".${var.domain}"
   ])
-  rule_name                           = trimprefix("${local.subdomain}-${local.service_name}-${local.environment}", "-")
-  health_check_path                   = lookup(local.example_service.meta, "health_check_path", "/")
-  health_check_healthy_response_codes = lookup(local.example_service.meta, "health_check_healthy_response_codes", "200")
+  rule_name = trimprefix("${local.subdomain}-${local.service_name}-${local.environment}", "-")
+  health_check_path  = lookup(local.example_service.meta, "health_check_path", "/")
+  health_check_healthy_response_codes  = lookup(local.example_service.meta, "health_check_healthy_response_codes", "200")
 }
 
 data "aws_vpc" "default" {
-  provider = aws.target-account
   filter {
     name   = "tag:Default"
     values = ["Yes"]
@@ -44,34 +36,31 @@ data "aws_vpc" "default" {
 
 # This is the DEFAULT load balancer. All nomad jobs listen through this laod balancer
 data "aws_alb" "default" {
-  provider = aws.target-account
   name     = "consul-ingress-alb"
 }
 
 # The load balancer has a listener on 443
 data "aws_lb_listener" "selected443" {
-  provider          = aws.target-account
   load_balancer_arn = data.aws_alb.default.arn
   port              = 443
 }
 
 # Create a target group for all versions of the service
 resource "aws_lb_target_group" "service-tg" {
-  provider    = aws.target-account
+  # Trim length to comply with AWS naming requirements
   name        = "${replace(substr(local.hostname, 0, 28), ".", "-")}-tg"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = data.aws_vpc.default.id
   health_check {
-    path    = local.health_check_path
+    path = local.health_check_path
     matcher = local.health_check_healthy_response_codes
   }
 }
 
 # Create a target group attachment for all versions IP:port
 resource "aws_lb_target_group_attachment" "test" {
-  provider         = aws.target-account
   for_each         = var.services
   target_group_arn = aws_lb_target_group.service-tg.arn
   target_id        = each.value.node_address
@@ -80,22 +69,21 @@ resource "aws_lb_target_group_attachment" "test" {
 
 # Create a target group for each version of the service
 resource "aws_lb_target_group" "service-version-tg" {
-  provider    = aws.target-account
   for_each    = toset(local.versions)
+  # Trim length to comply with AWS naming requirements
   name        = "${substr(local.rule_name, 0, 28 - length(local.rule_name))}-${replace(each.value, ".", "-")}-tg"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = data.aws_vpc.default.id
   health_check {
-    path    = local.health_check_path
+    path = local.health_check_path
     matcher = local.health_check_healthy_response_codes
   }
 }
 
 # Create a target group attachment for each version IP:port
 resource "aws_lb_target_group_attachment" "versions" {
-  provider         = aws.target-account
   for_each         = var.services
   target_group_arn = aws_lb_target_group.service-version-tg[lookup(each.value.meta, "version", "none")].arn
   target_id        = each.value.node_address
@@ -103,7 +91,7 @@ resource "aws_lb_target_group_attachment" "versions" {
 }
 
 # We need to find a random integer to set the priority for the default service based rule. It doesnt matter what it is,
-# we jsut need to be sure that the version specific rules are higher priority then the service default
+# we just need to be sure that the version specific rules are higher priority then the service default
 resource "random_integer" "priority" {
   min = 10
   max = 50000
@@ -118,7 +106,6 @@ locals {
 # order for the priority to be created correctly
 resource "aws_lb_listener_rule" "service_level" {
   depends_on   = [aws_lb_listener_rule.service_version_rules]
-  provider     = aws.target-account
   priority     = random_integer.priority.result
   listener_arn = data.aws_lb_listener.selected443.arn
 
@@ -138,7 +125,6 @@ resource "aws_lb_listener_rule" "service_level" {
 resource "aws_lb_listener_rule" "service_version_rules" {
   for_each     = toset(local.versions)
   priority     = element(local.versions_priority, index(local.versions, each.value))
-  provider     = aws.target-account
   listener_arn = data.aws_lb_listener.selected443.arn
 
   action {
@@ -160,8 +146,7 @@ resource "aws_lb_listener_rule" "service_version_rules" {
 }
 
 resource "aws_route53_record" "dns_record" {
-  provider = aws.shared-account
-  zone_id  = "Z1BX3OIJB7B6XS"
+  zone_id  = var.zone_id
   name     = local.hostname
   type     = "CNAME"
   ttl      = "300"
@@ -169,7 +154,6 @@ resource "aws_route53_record" "dns_record" {
 }
 
 resource "aws_acm_certificate" "cert" {
-  provider          = aws.target-account
   domain_name       = local.hostname
   validation_method = "DNS"
   lifecycle {
@@ -185,29 +169,25 @@ resource "aws_route53_record" "dns_validation" {
       type   = dvo.resource_record_type
     }
   }
-  provider        = aws.shared-account
   allow_overwrite = true
   name            = each.value.name
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = var.exactsciences_net_public_hosted_zone_id
+  zone_id         = var.zone_id
 }
 
 
 data "aws_lb" "consul_ingress_alb" {
-  provider = aws.target-account
   name     = "consul-ingress-alb"
 }
 
 data "aws_lb_listener" "https_listener" {
-  provider          = aws.target-account
   load_balancer_arn = data.aws_lb.consul_ingress_alb.arn
   port              = 443
 }
 
 resource "aws_lb_listener_certificate" "listener_cert" {
-  provider        = aws.target-account
   listener_arn    = data.aws_lb_listener.https_listener.arn
   certificate_arn = aws_acm_certificate.cert.arn
 }

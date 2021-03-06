@@ -4,7 +4,7 @@
 sudo snap install amazon-ssm-agent --classic
 
 # Docker
-sudo snap install docker
+apt-get install docker.io
 
 # Tools
 sudo apt-get update
@@ -28,7 +28,4 @@ sudo chown root:root nomad
 sudo mv nomad /usr/local/bin/
 sudo mkdir -p /etc/{nomad-server.d,nomad-client.d}
 sudo chmod -R 777 /opt/nomad
-sudo chmod g+s /opt/nomad
-sudo setfacl -d -m g::rwx /opt/nomad
-sudo setfacl -d -m o::rwx /opt/nomad
 sudo mkdir -p /opt/nomad/{server,client}

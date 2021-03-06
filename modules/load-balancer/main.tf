@@ -1,6 +1,3 @@
-provider "nomad" {
-  address = "https://nomad.${var.domain}"
-}
 
 variable "consul_terraform_sync_image" {
   default = "hashicorp/consul-terraform-sync:0.1.0-techpreview2"

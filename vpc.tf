@@ -1,21 +1,19 @@
-
-
 data "aws_vpc" "vpc" {
   default = true
 }
 
 data "aws_subnet" "subnet_a" {
-  availability_zone = "us-east-1a"
+  availability_zone = "${var.region}a"
   vpc_id            = data.aws_vpc.vpc.id
 }
 
 data "aws_subnet" "subnet_b" {
-  availability_zone = "us-east-1b"
+  availability_zone = "${var.region}b"
   vpc_id            = data.aws_vpc.vpc.id
 }
 
 data "aws_subnet" "subnet_c" {
-  availability_zone = "us-east-1c"
+  availability_zone = "${var.region}c"
   vpc_id            = data.aws_vpc.vpc.id
 }
 

@@ -1,3 +1,6 @@
+provider "nomad" {
+  address = "https://nomad.${var.domain}"
+}
 
 module "sync-lb" {
   source            = "./modules/load-balancer"
