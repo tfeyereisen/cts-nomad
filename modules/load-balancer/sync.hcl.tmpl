@@ -1,0 +1,40 @@
+log_level = "info"
+
+consul {
+  address = "https://consul.exactsciences.net"
+}
+
+buffer_period {
+  min = "5s"
+  max = "20s"
+}
+
+{{range services}}{{ if .Tags | contains "consul-ingress-alb=${namespace}-${region}" }}
+service {
+  name = "{{.Name}}"
+  tag = "consul-ingress-alb=${namespace}-${region}"
+  description = "all instances of the {{.Name}} service tagged with consul-ingress-alb=${namespace}-${region}"
+}
+{{end}}{{end}}
+
+task {
+  name = "consul-service-ingress-${region}"
+  description = "automate load balancer synchronization"
+  source = "/local/sync-module"
+  services = ["dummy", {{range services}}{{ if .Tags | contains "consul-ingress-alb=${namespace}-${region}" }}"{{.Name}}",{{end}}{{end}}]
+  buffer_period {
+    min = "10s"
+  }
+}
+
+driver "terraform" {
+  log = true
+  persist_log = false
+  working_dir = "/local/"
+  path = "/local/"
+  backend "s3" {
+    bucket = "exact-sciences-terraform-states"
+    region = "us-east-1"
+    key = "nomad/consul-ingress-alb/${namespace}-${region}"
+  }
+}

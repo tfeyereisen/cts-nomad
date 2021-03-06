@@ -25,7 +25,7 @@ resource "aws_lb" "alb" {
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id, data.aws_subnet.subnet_c.id]
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 }
 
 resource "aws_lb_listener" "redirect_http" {
