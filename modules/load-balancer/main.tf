@@ -1,6 +1,6 @@
 
 variable "consul_terraform_sync_image" {
-  default = "hashicorp/consul-terraform-sync:0.1.0-techpreview2"
+  default = "hashicorp/consul-terraform-sync:0.1.0-beta"
 }
 
 locals {
