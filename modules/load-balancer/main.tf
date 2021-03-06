@@ -1,5 +1,5 @@
 provider "nomad" {
-  address = "nomad.${var.domain}"
+  address = "https://nomad.${var.domain}"
 }
 
 variable "consul_terraform_sync_image" {
